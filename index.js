@@ -26,8 +26,15 @@ let persons = [
         "id": 4
     }
 ]
-
-app.use(morgan())
+morgan.token('post', (request,response)=>
+{
+    if(request.method === 'POST')
+        return JSON.stringify(request.body)
+    else
+        return ''
+})
+morgan.format('format' , ':method :url :status :res[content-length] - :response-time ms :post]')
+app.use(morgan(format))
 app.get('/api/persons' , (request,response)=>{
    response.json(persons) 
 })
