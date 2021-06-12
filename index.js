@@ -1,4 +1,4 @@
-const { request, response } = require('express')
+
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
@@ -87,7 +87,4 @@ app.delete('/api/persons/:id', (request, response) => {
   })
 app.post('/api/persons')
 const PORT = process.env.PORT || 3001
-app.listen(PORT, ()=>
-{
-    console.log(`server running on port ${PORT}`)
-})
+app.listen(PORT)
