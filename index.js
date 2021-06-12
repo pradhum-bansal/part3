@@ -3,7 +3,9 @@ const express = require('express')
 const app = express()
 const morgan = require('morgan')
 app.use(express.json())
+const cors = require('cors')
 
+app.use(cors())
 let persons = [
     {
         "name": "Arto Hellas",
@@ -33,8 +35,8 @@ morgan.token('post', (request,response)=>
     else
         return ''
 })
-morgan.format('format' , ':method :url :status :res[content-length] - :response-time ms :post]')
-app.use(morgan(format))
+morgan.format('postFormat',':method :url :status :res[content-length] - :response-time ms :post]')
+app.use(morgan('postFormat'))
 app.get('/api/persons' , (request,response)=>{
    response.json(persons) 
 })
