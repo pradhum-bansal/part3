@@ -1,7 +1,10 @@
 
 const express = require('express')
 const app = express()
+app.use(express.static('build'))
 const morgan = require('morgan')
+
+
 app.use(express.json())
 
 
@@ -39,6 +42,12 @@ morgan.token('post', (request,response)=>
 })
 morgan.format('postFormat',':method :url :status :res[content-length] - :response-time ms :post]')
 app.use(morgan('postFormat'))
+
+app.get('/',(request,response)=>
+ {
+     response.send('<h1>Hello</h1>')
+ })
+
 app.get('/api/persons' , (request,response)=>{
    response.json(persons) 
 })
@@ -85,6 +94,13 @@ app.delete('/api/persons/:id', (request, response) => {
     console.log(person)
     response.json(person)
   })
-app.post('/api/persons')
-const PORT = process.env.PORT || 3001
-app.listen(PORT)
+
+  const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+  }
+  
+  app.use(unknownEndpoint)
+  const PORT =  process.env.PORT || 3001
+  app.listen(PORT,()=>  {
+      console.log(`Server running on port ${PORT}`)
+  })
