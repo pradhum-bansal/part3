@@ -1,34 +1,16 @@
-
+require('dotenv').config()
 const express = require('express')
 const app = express()
-app.use(express.static('build'))
 const morgan = require('morgan')
-app.use(express.json())
 const cors = require('cors')
 
+const Person = require('./models/person')
+
 app.use(cors())
-let persons = [
-    {
-        "name": "Arto Hellas",
-        "number": "040-123456",
-        "id": 1
-    },
-    {
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523",
-        "id": 2
-    },
-    {
-        "name": "Dan Abramov",
-        "number": "12-43-234345",
-        "id": 3
-    },
-    {
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122",
-        "id": 4
-    }
-]
+app.use(express.json())
+app.use(express.static('build'))
+
+
 morgan.token('post', (request,response)=>
 {
     if(request.method === 'POST')
@@ -45,14 +27,20 @@ app.get('/',(request,response)=>
  })
 
 app.get('/api/persons' , (request,response)=>{
-   response.json(persons) 
+    Person.find({}).then(persons => {
+        response.json(persons)
+    })
 })
+
 app.get('/info' , (request, response)=>{
-    response.send(`
-    <p> Phonebook has ${persons.length} contacts</p>
-    <p> ${ new Date}</p>
-    `)
+    Person.find({}).then(persons => {
+        response.send(`
+        <p>Phonebook has info for ${persons.length} people</p>
+        <p>${new Date}</p>
+        `)
+    })
 })
+
 app.get('/api/persons/:id' ,(request, response)=>
 {
     const id = Number(request.params.id)
@@ -69,26 +57,21 @@ app.delete('/api/persons/:id', (request, response) => {
   
     response.status(204).end()
   })
-  app.post('/api/persons', (request, response) => {
-    const person = request.body
-    if(!person.name || !person.number)
-    {
-        return response.status(400).json({
-            error: 'name or number is missing'
-        })
-    }
-    else if(persons.find(x=>x.name=== person.name))
-    {
-        return response.status(400).json({
-            error: 'name must be unique'
-        })
-    }
 
-    const id = Math.floor(Math.random() * 9999)
-    person.id = id
-    persons = persons.concat(person)
-    console.log(person)
-    response.json(person)
+app.post('/api/persons', (request, response) => {
+    
+    const body = request.body
+    if (body.name === undefined || body.number === undefined) {
+        return response.status(400).json({ error: 'name or number missing' })
+    }
+    const person = new Person({
+        name: body.name,
+        number: body.number
+    })
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
+    
   })
 
   const unknownEndpoint = (request, response) => {
@@ -96,7 +79,7 @@ app.delete('/api/persons/:id', (request, response) => {
   }
   
   app.use(unknownEndpoint)
-  const PORT =  process.env.PORT || 3001
+  const PORT =  process.env.PORT 
   app.listen(PORT,()=>  {
       console.log(`Server running on port ${PORT}`)
   })
