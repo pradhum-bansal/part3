@@ -21,10 +21,7 @@ morgan.token('post', (request,response)=>
 morgan.format('postFormat',':method :url :status :res[content-length] - :response-time ms :post]')
 app.use(morgan('postFormat'))
 
-app.get('/',(request,response)=>
- {
-     response.send('<h1>Hello</h1>')
- })
+
 
 app.get('/api/persons' , (request,response)=>{
     Person.find({}).then(persons => {
